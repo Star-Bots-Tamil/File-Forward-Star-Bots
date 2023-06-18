@@ -63,13 +63,15 @@ async def forward_cmd(bot, message):
         return await message.reply('This may be group and iam not a admin of the group.')
     if lock.locked():
         return await message.reply_text('<b>Wait until previous process complete.</b>')        
+    skipped = int(temp_utils.CURRENT)
+    total = 0
     button = [[
         InlineKeyboardButton("Yes", callback_data=f"forward#{source_chat_id}#{last_msg_id}")
     ],[
         InlineKeyboardButton("No", callback_data="close")
     ]]
     await message.reply_text(
-        text="**Source Channel :- {source_chat.title}\nTarget Channel :- Star Database {filename}\nSkip messages :- <code>{skip}</code>\nTotal Messages :- <code>{total} {last_msg_id}</code>\nFile Caption :- {caption}\n\nDo you want to Start Forwarding ?**",
+        text="**Source Channel :- {source_chat.title}\nTarget Channel :- Star Database {filename}\nSkip messages :- <code>{skipped}</code>\nTotal Messages :- <code>{total}</code>\nFile Caption :- {caption}\n\nDo you want to Start Forwarding ?**",
         reply_markup=InlineKeyboardMarkup(button)
     )
 
@@ -177,7 +179,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     await bot.send_cached_media(
                         chat_id=int(TARGET_DB),
                         file_id=media.file_id,
-                        caption=CAPTION.get(user_id).format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption) if CAPTION.get(user_id) else FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption)
+                        caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption)
                     )
                     forwarded+=1
                     await asyncio.sleep(1)
@@ -194,7 +196,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     await bot.send_cached_media(
                         chat_id=int(TARGET_DB),
                         file_id=media.file_id,
-                        caption=CAPTION.get(user_id).format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption) if CAPTION.get(user_id) else FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption)
+                        caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption)
                     )
                     forwarded+=1
                     continue
