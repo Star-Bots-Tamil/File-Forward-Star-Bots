@@ -4,13 +4,14 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import ChannelInvalid, UsernameInvalid, UsernameNotModified
 from pyrogram.errors import FloodWait
 from script import scripts
-from vars import ADMINS, TARGET_DB
+from vars import ADMINS, TARGET_DB, FILE_CAPTION
 import asyncio
 import re
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
+CAPTION = {}
 
 @Client.on_message(filters.command("start"))
 async def start_message(bot, message):
@@ -46,7 +47,7 @@ async def forward_cmd(bot, message):
     else:
         return
     try:
-        await bot.get_chat(source_chat_id)
+        source_chat = await bot.get_chat(source_chat_id)
     except ChannelInvalid:
         return await message.reply('This may be a private channel / group. Make me an admin over there to index the files.')
     except (UsernameInvalid, UsernameNotModified):
@@ -62,13 +63,26 @@ async def forward_cmd(bot, message):
         return await message.reply('This may be group and iam not a admin of the group.')
     if lock.locked():
         return await message.reply_text('<b>Wait until previous process complete.</b>')
+
+    skip = temp_utils.CURRENT.get(message.from_user.id)
+    if skip:
+        skip = skip
+    else:
+        skip = 0
+
+    caption = CAPTION.get(message.from_user.id)
+    if caption:
+        caption = caption
+    else:
+        caption = FILE_CAPTION   
+        
     button = [[
-        InlineKeyboardButton("YES", callback_data=f"forward#{source_chat_id}#{last_msg_id}")
+        InlineKeyboardButton("Yes", callback_data=f"forward#{source_chat_id}#{last_msg_id}")
     ],[
-        InlineKeyboardButton("NO", callback_data="close")
+        InlineKeyboardButton("No", callback_data="close")
     ]]
     await message.reply_text(
-        text="Do you want to start forwarding ?",
+        text="**Source Channel :- {source_chat.title}\nTarget Channel :- Star Database {filename}\nSkip messages :- <code>{skip}</code>\nTotal Messages :- <code>{total} {last_msg_id}</code>\nFile Caption :- {caption}\n\nDo you want to Start Forwarding ?**",
         reply_markup=InlineKeyboardMarkup(button)
     )
 
@@ -93,12 +107,20 @@ async def skip_msgs(bot, message):
         await message.reply(f"Successfully set SKIP number as {skip}")
         temp_utils.CURRENT = int(skip)
     else:
-        await message.reply("Give me a skip number")
+        await message.reply("**Give me a Skip Number**")
 
+@Client.on_message(filters.private & filters.command(['set_caption']))
+async def set_caption(bot, message):
+    try:
+        caption = message.text.split(" ", 1)[1]
+    except:
+        return await message.reply("**Give me a caption.\n\nFile Caption Keys\n• `{filename}` :- Replaced by the Filename.\n• `{file_size}` :- Replaced by the Filesize.\n• `{caption}` :- Default File Caption ✍🏻**\n`/set_caption <b>{file_name}</b>`")
+    CAPTION[message.from_user.id] = caption
+    await message.reply(f"Successfully set file caption.\n\n{caption}")
 
 async def start_forward(bot, userid, source_chat_id, last_msg_id):
     btn = [[
-        InlineKeyboardButton("CANCEL", callback_data="cancel_forward")
+        InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
     ]]
     active_msg = await bot.send_message(
         chat_id=int(userid),
@@ -116,7 +138,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
     async with lock:
         try:
             btn = [[
-                InlineKeyboardButton("CANCEL", callback_data="cancel_forward")
+                InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
             ]]
             status = 'Forwarding...'
             await active_msg.edit(
@@ -135,14 +157,14 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                 current += 1
                 if current % 20 == 0:
                     btn = [[
-                        InlineKeyboardButton("CANCEL", callback_data="cancel_forward")
+                        InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
                     ]]
-                    status = 'Sleeping for 30 seconds.'
+                    status = 'Sleeping for 10 seconds.'
                     await active_msg.edit(
                         text=f"<b>Forwarding on progress...\n\nTotal: {total}\nSkipped: {skipped}\nForwarded: {forwarded}\nEmpty Message: {empty}\nNot Media: {notmedia}\nUnsupported Media: {unsupported}\nMessages Left: {left}\n\nStatus: {status}</b>",
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
-                    await asyncio.sleep(30)
+                    await asyncio.sleep(10)
                     status = 'Forwarding...'
                     await active_msg.edit( 
                         text=f"<b>Forwarding on progress...\n\nTotal: {total}\nSkipped: {skipped}\nForwarded: {forwarded}\nEmpty Message: {empty}\nNot Media: {notmedia}\nUnsupported Media: {unsupported}\nMessages Left: {left}\n\nStatus: {status}</b>", 
@@ -154,26 +176,38 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                 elif not msg.media:
                     notmedia += 1
                     continue
-                elif msg.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.AUDIO, enums.MessageMediaType.DOCUMENT]:
+                elif msg.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT]:
+                    unsupported += 1
+                    continue
+                media = getattr(message, message.media.value, None)
+                if not media:
+                    unsupported += 1
+                    continue
+                elif media.mime_type not in ['video/mp4', 'video/x-matroska', 'video/x-msvideo']:  # Non mp4, mkv and avi files types skipping
                     unsupported += 1
                     continue
                 try:
-                    await msg.copy(
-                        chat_id=int(TARGET_DB)
+                    await bot.send_cached_media(
+                        chat_id=int(TARGET_DB),
+                        file_id=media.file_id,
+                        caption=CAPTION.get(user_id).format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption) if CAPTION.get(user_id) else FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption)
                     )
                     forwarded+=1
                     await asyncio.sleep(1)
                 except FloodWait as e:
                     btn = [[
-                        InlineKeyboardButton("CANCEL", callback_data="cancel_forward")
+                        InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
                     ]]
                     await active_msg.edit(
                         text=f"<b>Got FloodWait.\n\nWaiting for {e.value} seconds.</b>",
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
-                    await asyncio.sleep(e.value)
-                    await msg.copy(
-                        chat_id=int(TARGET_DB)
+                except FloodWait as e:
+                    await asyncio.sleep(e.value)  # Wait "value" seconds before continuing
+                    await bot.send_cached_media(
+                        chat_id=int(TARGET_DB),
+                        file_id=media.file_id,
+                        caption=CAPTION.get(user_id).format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption) if CAPTION.get(user_id) else FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=message.caption)
                     )
                     forwarded+=1
                     continue
@@ -183,3 +217,13 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             await active_msg.edit(f'<b>Error:</b> <code>{e}</code>')
         else:
             await active_msg.edit(f"<b>Successfully Completed Forward Process !\n\nTotal: {total}\nSkipped: {skipped}\nForwarded: {forwarded}\nEmpty Message: {empty}\nNot Media: {notmedia}\nUnsupported Media: {unsupported}\nMessages Left: {left}\n\nStatus: {status}</b>")
+
+def get_size(size):
+    units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
+    size = float(size)
+    i = 0
+    while size >= 1024.0 and i < len(units):
+        i += 1
+        size /= 1024.0
+    return "%.2f %s" % (size, units[i])            
+            
