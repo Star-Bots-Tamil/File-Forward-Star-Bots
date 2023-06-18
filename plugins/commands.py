@@ -63,20 +63,15 @@ async def forward_cmd(bot, message):
         return await message.reply('This may be group and iam not a admin of the group.')
     if lock.locked():
         return await message.reply_text('<b>Wait until previous process complete.</b>')        
-    source_chat = await bot.get_chat(source_chat_id)
-    skip = int(temp_utils.CURRENT)
-    total = 0
-    caption = int(FILE_CAPTION)
     button = [[
         InlineKeyboardButton("Yes", callback_data=f"forward#{source_chat_id}#{last_msg_id}")
     ],[
         InlineKeyboardButton("No", callback_data="close")
     ]]
     await message.reply_text(
-        text="**Source Channel :- {source_chat.title}\nTarget Channel :- Star Database {filename}\nSkip messages :- <code>{skip}</code>\nTotal Messages :- <code>{total}</code>\nFile Caption :- {caption}\n\nDo you want to Start Forwarding ?**",
+        text="**Source Channel :- {await bot.get_chat(source_chat_id).title}\nTarget Channel :- Star Database {filename}\nSkip messages :- <code>{int(temp_utils.CURRENT)}</code>\nTotal Messages :- <code>{message.forward_from_message_id}</code>\nFile Caption :- {int(FILE_CAPTION)}\n\nDo you want to Start Forwarding ?**",
         reply_markup=InlineKeyboardMarkup(button)
     )
-
 
 @Client.on_message(filters.command('logs') & filters.user(ADMINS))
 async def log_file(bot, message):
