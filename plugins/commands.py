@@ -179,7 +179,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                 elif msg.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT]:
                     unsupported += 1
                     continue
-                media = getattr(message, message.media.value, None)
+                media = getattr(msg, msg.media.value, None)
                 if not media:
                     unsupported += 1
                     continue
