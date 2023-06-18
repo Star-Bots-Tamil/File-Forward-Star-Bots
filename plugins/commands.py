@@ -62,20 +62,7 @@ async def forward_cmd(bot, message):
     if k.empty:
         return await message.reply('This may be group and iam not a admin of the group.')
     if lock.locked():
-        return await message.reply_text('<b>Wait until previous process complete.</b>')
-
-    skip = temp_utils.CURRENT.get(message.from_user.id)
-    if skip:
-        skip = skip
-    else:
-        skip = 0
-
-    caption = CAPTION.get(message.from_user.id)
-    if caption:
-        caption = caption
-    else:
-        caption = FILE_CAPTION   
-        
+        return await message.reply_text('<b>Wait until previous process complete.</b>')        
     button = [[
         InlineKeyboardButton("Yes", callback_data=f"forward#{source_chat_id}#{last_msg_id}")
     ],[
