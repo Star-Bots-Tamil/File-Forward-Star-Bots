@@ -200,7 +200,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             status = 'Completed !'
         except Exception as e:
             logger.exception(e)
-            await active_msg.edit(f'<b>Error:</b> <code>{e}</code>')
+            await msg.reply(f'<b>Error :-</b> <code>{e}</code>')
         else:
             await active_msg.edit(f"<b>Successfully Completed Forward Process !\n\nTotal: {total}\nSkipped: {skipped}\nForwarded: {forwarded}\nEmpty Message: {empty}\nNot Media: {notmedia}\nUnsupported Media: {unsupported}\nMessages Left: {left}\n\nStatus: {status}</b>")
 
