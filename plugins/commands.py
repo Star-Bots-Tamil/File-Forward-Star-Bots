@@ -69,7 +69,7 @@ async def forward_cmd(bot, message):
         InlineKeyboardButton("No", callback_data="close")
     ]]
     await message.reply_text(
-        text="**Do you want to Start Forwarding ?**",
+        text="**--Check Caption-- :- /set_caption to Check\n--Skip Messages-- :- /setskip To skip a Number of Messages\n\n\nDo you want to Start Forwarding ?**",
         reply_markup=InlineKeyboardMarkup(button)
     )
 
