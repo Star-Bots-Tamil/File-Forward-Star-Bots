@@ -153,7 +153,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     await asyncio.sleep(60)
                     status = 'Forwarding...'
                     await active_msg.edit( 
-                        text=f"<b>Forwarding on progress...\n\nTotal: {total}\nSkipped: {skipped}\nForwarded: {forwarded}\nEmpty Message: {empty}\nNot Media: {notmedia}\nUnsupported Media: {unsupported}\nMessages Left: {left}\n\nStatus: {status}</b>", 
+                        text=f"<b>Forwarding on progress update...\n\nTotal: {total}\nSkipped: {skipped}\nForwarded: {forwarded}\nEmpty Message: {empty}\nNot Media: {notmedia}\nUnsupported Media: {unsupported}\nMessages Left: {left}\n\nStatus: {status}</b>", 
                         reply_markup=InlineKeyboardMarkup(btn) 
                     )
                 if msg.empty:
