@@ -115,6 +115,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
     )
     skipped = int(temp_utils.CURRENT)
     total = 0
+    fetched = 0
     forwarded = 0
     empty = 0
     notmedia = 0
@@ -128,7 +129,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             ]]
             status = 'Forwarding...'
             await active_msg.edit(
-                text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nSkipped :- {skipped}\nForwarded :- {forwarded}\nEmpty Message :- {empty}\nNot Media :- {notmedia}\nUnsupported Media :- {unsupported}\nMessages Left :- {left}\n\nStatus :- {status}</b>",
+                text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>",
                 reply_markup=InlineKeyboardMarkup(btn)
             )
             current = temp_utils.CURRENT
@@ -136,10 +137,11 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             async for msg in bot.iter_messages(source_chat_id, int(last_msg_id), int(temp_utils.CURRENT)):
                 if temp_utils.CANCEL:
                     status = 'Cancelled !'
-                    await active_msg.edit(f"<b>Forward Cancelled!\n\nTotal :- <code>{total}</code>\nSkipped :- {skipped}\nForwarded :- {forwarded}\nEmpty Message :- {empty}\nNot Media :- {notmedia}\nUnsupported Media :- {unsupported}\nMessages Left :- {left}\n\nStatus :- {status}</b>")
+                    await active_msg.edit(f"<b>Forward Cancelled!\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>")
                     break
                 left = int(last_msg_id)-int(total)
-                total = current
+                total = int(last_msg_id)
+                fetched = current
                 current += 1
                 if current % 20 == 0:
                     btn = [[
@@ -147,13 +149,13 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     ]]
                     status = 'Sleeping for 60 seconds.'
                     await active_msg.edit(
-                        text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nSkipped :- {skipped}\nForwarded :- {forwarded}\nEmpty Message :- {empty}\nNot Media :- {notmedia}\nUnsupported Media :- {unsupported}\nMessages Left :- {left}\n\nStatus :- {status}</b>",
+                        text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>",
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                     await asyncio.sleep(60)
                     status = 'Forwarding...'
                     await active_msg.edit( 
-                        text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nSkipped :- {skipped}\nForwarded :- {forwarded}\nEmpty Message :- {empty}\nNot Media :- {notmedia}\nUnsupported Media :- {unsupported}\nMessages Left :- {left}\n\nStatus :- {status}</b>", 
+                        text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>", 
                         reply_markup=InlineKeyboardMarkup(btn) 
                     )
                 if msg.empty:
@@ -185,7 +187,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                         InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
                     ]]
                     await active_msg.edit(
-                        text=f"<b>Got FloodWait.\n\nWaiting for {e.value} Seconds.</b>",
+                        text=f"<b>Forwarding Cancelled..\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- Cancelled..\n\nGot FloodWait.\n\nWaiting for {e.value} Seconds.</b>",
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
                 except FloodWait as e:
@@ -200,9 +202,9 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             status = 'Completed !'
         except Exception as e:
             logger.exception(e)
-            await active_msg.edit(f'<b>Forwarding Cancelled..\n\nTotal :- <code>{total}</code>\nSkipped :- {skipped}\nForwarded :- {forwarded}\nEmpty Message :- {empty}\nNot Media :- {notmedia}\nUnsupported Media :- {unsupported}\nMessages Left :- {left}\n\nStatus :- {status}\n\nError :-</b> <code>{e}</code>')
+            await active_msg.edit(f'<b>Forwarding Cancelled..\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- Cancelled !\n\nError :-</b> <code>{e}</code>')
         else:
-            await active_msg.edit(f"<b>Successfully Completed Forward Process...!\n\nTotal :- <code>{total}</code>\nSkipped :- {skipped}\nForwarded :- {forwarded}\nEmpty Message :- {empty}\nNot Media :- {notmedia}\nUnsupported Media :- {unsupported}\nMessages Left :- {left}\n\nStatus :- {status}</b>")
+            await active_msg.edit(f"<b>Successfully Completed Forward Process...!\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>")
 
 def get_size(size):
     units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
