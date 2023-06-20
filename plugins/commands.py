@@ -139,7 +139,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     status = 'Cancelled !'
                     await active_msg.edit(f"<b>Forward Cancelled!\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>")
                     break
-                left = int(last_msg_id)-int(total)
+                left = int(last_msg_id)-int(fetched)
                 total = int(last_msg_id)
                 fetched = current
                 current += 1
