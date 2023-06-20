@@ -33,3 +33,7 @@ Dᴇᴠᴇʟᴏᴘᴇʀ:
 /set_caption :- Set Custom Caption ✍🏻
 
 This bot might be available to all in the future.</b>"""
+
+    PROGRESS_BAR = """<b>\n
+💯 Percentage :- {0}%\n
+⏰ Time Left :- {4}\n\n©️ [Star Bots Tamil](https://t.me/Star_Bots_Tamil)</b>"""
