@@ -126,6 +126,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
     notmedia = 0
     unsupported = 0
     left = 0
+    progress = progress_for_pyrogram
     status = 'Idle'
     async with lock:
         try:
