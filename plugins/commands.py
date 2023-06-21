@@ -118,6 +118,25 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
         text="<b>Starting Forward Process...</b>",
         reply_markup = InlineKeyboardMarkup(btn)
     )
+    now = time.time()
+    diff = now - start
+    if round(diff % 5.00) == 0 or fetched == total:        
+        percentage = fetched * 100 / total
+        elapsed_time = round(diff) * 1000
+        time_to_completion = round((total - fetched) / speed) * 1000
+        estimated_total_time = elapsed_time + time_to_completion
+
+        elapsed_time = TimeFormatter(milliseconds=elapsed_time)
+        estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
+
+        progress = "[{0}{1}]".format(
+            ''.join(["■" for i in range(math.floor(percentage / 10))]),
+            ''.join(["□" for i in range(10 - math.floor(percentage / 10))])
+        )            
+        tmp = progress + scripts.PROGRESS_BAR.format( 
+            round(percentage, 2), # 0
+            estimated_total_time if estimated_total_time != '' else "0 s" # 1
+    )    
     skipped = int(temp_utils.CURRENT)
     total = 0
     fetched = 0
@@ -135,7 +154,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             ]]
             status = 'Forwarding...'
             await active_msg.edit(
-                text=f"<b>Forwarding on Progress...\n\n{progress}\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n💯 Percentage :- {0}\n\nStatus :- {status}</b>",
+                text=f"<b>Forwarding on Progress...\n\n{tmp}\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n💯 Percentage :- {0}\n\nStatus :- {status}</b>",
                 reply_markup=InlineKeyboardMarkup(btn)
             )
             current = temp_utils.CURRENT
