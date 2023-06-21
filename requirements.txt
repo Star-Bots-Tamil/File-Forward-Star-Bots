@@ -1,6 +1,5 @@
-pyrogram>=2.0.88
+Pyrogram==2.0.92
 tgcrypto
 pytz
 aiohttp
 datetime
-pip3 install -U pyrogram
