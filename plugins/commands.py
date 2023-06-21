@@ -173,10 +173,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     unsupported += 1
                     continue
                 media = getattr(msg, msg.media.value, None)
-                if not media:
-                    unsupported += 1
-                    continue
-                elif media.mime_type not in ['video/mp4', 'video/x-matroska']:  # Non mp4 and mkv files types skipping
+                if media.mime_type not in ['video/mp4', 'video/x-matroska']:  # Non mp4 and mkv files types skipping
                     unsupported += 1
                     continue
                 try:
