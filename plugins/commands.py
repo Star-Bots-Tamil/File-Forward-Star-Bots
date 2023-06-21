@@ -117,26 +117,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
         chat_id=int(userid),
         text="<b>Starting Forward Process...</b>",
         reply_markup = InlineKeyboardMarkup(btn)
-    )
-    now = time.time()
-    diff = now - start
-    if round(diff % 5.00) == 0 or fetched == total:        
-        percentage = fetched * 100 / total
-        elapsed_time = round(diff) * 1000
-        time_to_completion = round((total - fetched) / speed) * 1000
-        estimated_total_time = elapsed_time + time_to_completion
-
-        elapsed_time = TimeFormatter(milliseconds=elapsed_time)
-        estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
-
-        progress = "[{0}{1}]".format(
-            ''.join(["■" for i in range(math.floor(percentage / 10))]),
-            ''.join(["□" for i in range(10 - math.floor(percentage / 10))])
-        )            
-        tmp = scripts.PROGRESS_BAR.format( 
-            round(percentage, 2), # 0
-            estimated_total_time if estimated_total_time != '' else "0 s" # 1
-    )    
+    ) 
     skipped = int(temp_utils.CURRENT)
     total = 0
     fetched = 0
@@ -171,12 +152,12 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     btn = [[
                         InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
                     ]]
-                    status = 'Sleeping for 60 seconds.'
+                    status = 'Sleeping for 30 seconds.'
                     await active_msg.edit(
                         text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>",
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(30)
                     status = 'Forwarding...'
                     await active_msg.edit( 
                         text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>", 
@@ -199,7 +180,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     unsupported += 1
                     continue
                 try:
-                    await bot.send_cached_media(
+                    await msg.copy(
                         chat_id=int(TARGET_DB),
                         file_id=media.file_id,
                         caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=msg.caption)
@@ -216,7 +197,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     )
                 except FloodWait as e:
                     await asyncio.sleep(e.value)  # Wait "value" seconds before continuing
-                    await bot.send_cached_media(
+                    await msg.copy(
                         chat_id=int(TARGET_DB),
                         file_id=media.file_id,
                         caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=msg.caption)
