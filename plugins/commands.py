@@ -17,6 +17,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
 CAPTION = {}
+CANCEL = {}
+
+@Client.on_callback_query(filters.regex(r'^forward'))
+async def forward(bot, query):
+    _, ident, chat, lst_msg_id = query.data.split("#")
+    if ident == 'cancel':
+        await query.message.edit("<b>Trying to 🚫 Cancel Forwarding...</b>")
+        CANCEL[query.from_user.id] = True    
 
 @Client.on_message(filters.command("start"))
 async def start_message(bot, message):
@@ -111,7 +119,7 @@ async def set_caption(bot, message):
 
 async def start_forward(bot, userid, source_chat_id, last_msg_id):
     btn = [[
-        InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
+        InlineKeyboardButton("🚫 Cancel", callback_data="forward#cancel#{source_chat_id}#{lst_msg_id}")
     ]]
     active_msg = await bot.send_message(
         chat_id=int(userid),
@@ -130,7 +138,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
     async with lock:
         try:
             btn = [[
-                InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
+                InlineKeyboardButton("🚫 Cancel", callback_data="forward#cancel#{source_chat_id}#{lst_msg_id}")
             ]]
             status = 'Forwarding...'
             await active_msg.edit(
@@ -150,7 +158,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                 current += 1
                 if current % 20 == 0:
                     btn = [[
-                        InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
+                        InlineKeyboardButton("🚫 Cancel", callback_data="forward#cancel#{source_chat_id}#{lst_msg_id}")
                     ]]
                     status = 'Sleeping for 60 Seconds.'
                     await active_msg.edit(
@@ -182,7 +190,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     await asyncio.sleep(1)
                 except FloodWait as e:
                     btn = [[
-                        InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
+                        InlineKeyboardButton("🚫 Cancel", callback_data="forward#cancel#{source_chat_id}#{lst_msg_id}")
                     ]]
                     await active_msg.edit(
                         text=f"<b>Got FloodWait.\n\nWaiting for {e.value} Seconds.</b>",
