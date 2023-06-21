@@ -169,16 +169,14 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                 elif not msg.media:
                     notmedia += 1
                     continue
-                elif msg.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT]:
-                    unsupported += 1
-                    continue
                 media = getattr(msg, msg.media.value, None)
-                if media.mime_type not in ['video/mp4', 'video/x-matroska']:  # Non mp4 and mkv files types skipping
+                if msg.media not in [enums.MessageMediaType.VIDEO, enums.MessageMediaType.DOCUMENT]:
                     unsupported += 1
                     continue
                 try:
                     await msg.copy(
                         chat_id=int(TARGET_DB),
+                        caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=msg.caption)
                     )
                     forwarded+=1
                     await asyncio.sleep(1)
@@ -194,6 +192,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     await asyncio.sleep(e.value)  # Wait "value" seconds before continuing
                     await msg.copy(
                         chat_id=int(TARGET_DB),
+                        caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=msg.caption)
                     )
                     forwarded+=1
                     continue
@@ -202,7 +201,7 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
             logger.exception(e)
             await active_msg.edit(f'<b>Forwarding Cancelled..\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- Cancelled !\n\nError :-</b> <code>{e}</code>')
         else:
-            await active_msg.edit(f"<b>Successfully Completed Forward Process...!\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>")
+            await active_msg.edit(f"<b>Successfully Forward Completed..!\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>")
 
 def get_size(size):
     units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
@@ -212,23 +211,3 @@ def get_size(size):
         i += 1
         size /= 1024.0
     return "%.2f %s" % (size, units[i])           
-
-def TimeFormatter(milliseconds: int) -> str:
-    seconds, milliseconds = divmod(int(milliseconds), 1000)
-    minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    days, hours = divmod(hours, 24)
-    tmp = ((str(days) + "D, ") if days else "") + \
-        ((str(hours) + "H, ") if hours else "") + \
-        ((str(minutes) + "M, ") if minutes else "") + \
-        ((str(seconds) + "s, ") if seconds else "") + \
-        ((str(milliseconds) + "MS, ") if milliseconds else "")
-    return tmp[:-2] 
-
-def convert(seconds):
-    seconds = seconds % (24 * 3600)
-    hour = seconds // 3600
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60      
-    return "%d:%02d:%02d" % (hour, minutes, seconds)
