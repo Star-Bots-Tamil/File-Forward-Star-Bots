@@ -179,7 +179,6 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                 try:
                     await msg.copy(
                         chat_id=int(TARGET_DB),
-                        caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=msg.caption)
                     )
                     forwarded+=1
                     await asyncio.sleep(1)
@@ -195,7 +194,6 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     await asyncio.sleep(e.value)  # Wait "value" seconds before continuing
                     await msg.copy(
                         chat_id=int(TARGET_DB),
-                        caption=FILE_CAPTION.format(file_name=media.file_name, file_size=get_size(media.file_size), caption=msg.caption)
                     )
                     forwarded+=1
                     continue
