@@ -152,12 +152,12 @@ async def start_forward(bot, userid, source_chat_id, last_msg_id):
                     btn = [[
                         InlineKeyboardButton("🚫 Cancel", callback_data="cancel_forward")
                     ]]
-                    status = 'Sleeping for 30 seconds.'
+                    status = 'Sleeping for 60 Seconds.'
                     await active_msg.edit(
                         text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>",
                         reply_markup=InlineKeyboardMarkup(btn)
                     )
-                    await asyncio.sleep(30)
+                    await asyncio.sleep(60)
                     status = 'Forwarding...'
                     await active_msg.edit( 
                         text=f"<b>Forwarding on Progress...\n\nTotal :- <code>{total}</code>\nFetched :- <code>{fetched}</code>\nSkipped :- <code>{skipped}</code>\nForwarded :- <code>{forwarded}</code>\nEmpty Message :- <code>{empty}</code>\nNot Media :- <code>{notmedia}</code>\nUnsupported Media :- <code>{unsupported}</code>\nMessages Left :- <code>{left}</code>\n\nStatus :- {status}</b>", 
