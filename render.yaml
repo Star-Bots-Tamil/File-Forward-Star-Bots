@@ -4,7 +4,7 @@ services:
     name: File-Forward-Bot
     env: python
     startCommand: python3 bot.py
-    buildCommand: pip3 install -U -r requirements.txt
+    buildCommand: pip3 install -U -r requirements.txt && pip3 install pyrogram
     repo: https://github.com/Star-Bots-Tamil/File-Forward-Star-Bots.git # optional
     region: oregon # optional (defaults to oregon)
     plan: free # optional (defaults to starter)
