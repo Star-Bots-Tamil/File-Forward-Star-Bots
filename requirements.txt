@@ -1,4 +1,5 @@
-Pyrogram==2.0.92
+got+https://github.com/pyrogram/pyrogram
+pyrogram==2.0.92
 tgcrypto
 pytz
 aiohttp
